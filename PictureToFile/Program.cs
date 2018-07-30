@@ -91,11 +91,12 @@ namespace PictureToFile
             }
 
             int i;
+            bool stop = false;
 
             Console.WriteLine(String.Format("파일 로드를 마쳤습니다.\n픽셀 수 : {0}\n", color.Count));
             Console.WriteLine("사진을 데이터로 변환합니다.");
 
-            for (i = 0; i < color.Count; i++)
+            for (i = 0; (i < color.Count) && (!stop); i++)
             {
                 Color currentPixel = color[i];
 
@@ -106,34 +107,50 @@ namespace PictureToFile
                         output.Add(currentPixel.G);
                         output.Add(currentPixel.B);
                         break;
-                    case 1:
+                    case 254:
+                    case 3:
                         output.Add(currentPixel.R);
+                        output.Add(currentPixel.G);
+                        output.Add(currentPixel.B);
+                        stop = true;
                         break;
+                    case 252:
                     case 2:
                         output.Add(currentPixel.R);
                         output.Add(currentPixel.G);
+                        stop = true;
+                        break;
+                    case 253:
+                    case 1:
+                        output.Add(currentPixel.R);
+                        stop = true;
                         break;
                 }
             }
 
             Console.WriteLine("사진을 성공적으로 변환했습니다.\n");
-            Console.WriteLine("마무리 작업을 시작합니다.");
 
-            int offset;
+            /*
+             * Depracted Source
+             * 
+             * Console.WriteLine("마무리 작업을 시작합니다.");
+             * 
+             * int offset;
+             * for (offset = output.Count - 1; offset > 0; offset--)
+             * {
+             *     if (output[offset].ToString().Equals("0"))
+             *     {
+             *         output.RemoveAt(offset);
+             *     }
+             *     else
+             *     {
+             *         break;
+             *     }
+             * }
+             * 
+             * Console.WriteLine("마무리 작업을 완료했습니다\n");
+             */
 
-            for (offset = output.Count - 1; offset > 0; offset--)
-            {
-                if (output[offset].ToString().Equals("0"))
-                {
-                    output.RemoveAt(offset);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            Console.WriteLine("마무리 작업을 완료했습니다\n");
             Console.WriteLine("파일로 저장합니다.");
 
             File.WriteAllBytes("output.bin", output.ToArray());
